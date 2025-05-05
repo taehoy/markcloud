@@ -18,20 +18,35 @@ async def root(page: int = 1, limit: int = 10):
     with open("trademark_sample.json", "r") as f:
         data = json.load(f)
     
+    for item in data:
+        if not item["applicationDate"] :
+            print("No application number")
+
     return data[start: end]
 
 @app.get("/search")
 async def search(
     q: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
+    order: Optional[str] = Query("desc"),
     page: int = 1,
     limit: int = 10
     ):
-    print(q)
+
     start = (page - 1) * limit
     end = start + limit
     with open("trademark_sample.json", "r") as f:
         data = json.load(f)
+
+    # 출원일 정렬 필터링 - 기본값 desc(내림차순)
+    if order:
+        if order == "asc":
+            data = sorted(data, key=lambda x: x["applicationDate"])
+        elif order == "desc":
+            data = sorted(data, key=lambda x: x["applicationDate"], reverse=True)
+
+    for item in data:
+        print(item["applicationDate"])
 
     # 상표현황 필터링
     if status:
