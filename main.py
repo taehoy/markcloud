@@ -19,9 +19,6 @@ async def search(q: str, page: int = 1, limit: int = 10):
     with open("trademark_sample.json", "r") as f:
         data = json.load(f)
     
-    filtered_data = []
-    for item in data:
-        if q.lower() in str(item["productName"]):
-            filtered_data.append(item)
+    filtered_data = [item for item in data if q.lower() in str(item["productName"])]
 
     return filtered_data[start: end]
