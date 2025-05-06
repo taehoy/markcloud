@@ -8,7 +8,6 @@ import json
 ProductRouter = APIRouter()
 product_service = ProductService()
 
-
 class RegisterStatus(str, Enum):
     APPLICATION = "출원",
     REGISTRATION = "등록",

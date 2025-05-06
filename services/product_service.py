@@ -1,13 +1,17 @@
+from repositories.product_repository import ProductRepository
 from enum import Enum
 from typing import Optional
 import json
+
+product_repository = ProductRepository()
 
 class ProductService:
     def get_all_trademark_data(self, page: int = 1, limit: int = 10):
         start = (page - 1) * limit
         end = start + limit
-        with open("trademark_sample.json", "r") as f:
-            data = json.load(f)
+
+        data = product_repository.load_data()
+        
         return data[start: end]
     
     def get_search_trademark_data(
@@ -21,8 +25,7 @@ class ProductService:
     ):
         start = (page - 1) * limit
         end = start + limit
-        with open("trademark_sample.json", "r") as f:
-            data = json.load(f)
+        data = product_repository.load_data()
         
         # 출원일 정렬 필터링 - 기본값 desc(내림차순)
         if order:
