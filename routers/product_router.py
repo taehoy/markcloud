@@ -38,7 +38,7 @@ async def search(
     limit: int = 10
     ):
 
-    result = product_service.get_search_trademark_data(
+    data = product_service.get_search_trademark_data(
         q=q,
         status=status,
         order=order,
@@ -46,4 +46,7 @@ async def search(
         page=page,
         limit=limit
     )
+    
+    result = [clean_nulls(item) for item in data]
+
     return result
