@@ -17,10 +17,10 @@ async def root(page: int = 1, limit: int = 10):
     end = start + limit
     with open("trademark_sample.json", "r") as f:
         data = json.load(f)
-    
+
     for item in data:
-        if not item["applicationDate"] :
-            print("No application number")
+        if item["asignProductMainCodeList"] is None:
+            print(item)
 
     return data[start: end]
 
@@ -29,10 +29,12 @@ async def search(
     q: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     order: Optional[str] = Query("desc"),
+    mainCode: Optional[str] = Query(None),
     page: int = 1,
     limit: int = 10
     ):
 
+    # 페이지네이션
     start = (page - 1) * limit
     end = start + limit
     with open("trademark_sample.json", "r") as f:
@@ -44,9 +46,14 @@ async def search(
             data = sorted(data, key=lambda x: x["applicationDate"])
         elif order == "desc":
             data = sorted(data, key=lambda x: x["applicationDate"], reverse=True)
-
-    for item in data:
-        print(item["applicationDate"])
+    
+    # 상품 주 분류 코드 필터링
+    if mainCode:
+        data = [
+            item for item in data
+            if item["asignProductMainCodeList"] and mainCode in item.get("asignProductMainCodeList", [])
+        ]
+        
 
     # 상표현황 필터링
     if status:
