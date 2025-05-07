@@ -71,7 +71,7 @@ def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
 
     for item in data:
         name = item.get("productName" if lang == "ko" else "productNameEng", "")
-        
+
         if not name:
             continue
 
@@ -152,8 +152,8 @@ def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
     #             similar_list.append(item)
     
     similar_list.sort(key=lambda x: x["_score"], reverse=False)
-    # for item in similar_list:
-    #     item.pop("_score", None)
+    for item in similar_list:
+        item.pop("_score", None)
         
     return include_list + sub_include_list+ similar_list
 
