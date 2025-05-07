@@ -14,7 +14,14 @@ okt = Okt()
 def split_korean_compound(keyword: str) -> list:
     return re.findall(r'..|.', keyword)
 
+def contains_kyword(keyword_parts: list, product_name: str) -> bool:
+    for keyword in keyword_parts:
+        if keyword in product_name:
+            return True
+    return False
+
 def levenstein_distance(s1: str, s2: str) -> int:
+
     m, n = len(s1), len(s2)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
     
@@ -43,21 +50,22 @@ def find_similar_keywords(keyword: str, data: list, lang: str, threshold: float 
     include_ids = set()
     score = 0.0
     keyword = keyword.rstrip()
-
+    
     if lang == "ko":
         for item in data:
+
             if not item["productName"] :
                 continue
-            # if contains_kyword(keyword_parts, item["productName"]):
-            #     include_list.append(item)
-            #     include_ids.add(id(item))
-            #     continue
-            for keyword in keyword_parts:
-                if keyword in item["productName"]:
-                    include_list.append(item)
-                    include_ids.add(id(item))
-                    continue
-            
+
+            if contains_kyword(keyword_parts, item["productName"]):
+                include_list.append(item)
+                include_ids.add(id(item))
+                continue
+            # for keyword in keyword_parts:
+            #     if keyword in item["productName"]:
+            #         include_list.append(item)
+            #         include_ids.add(id(item))
+
             # score = jellyfish.jaro_winkler_similarity(h2j(keyword), h2j(item["productName"]))
             # score = jarowinkler_similarity(keyword, item["productName"])
             score = levenstein_distance(h2j(keyword), h2j(item["productName"]))
