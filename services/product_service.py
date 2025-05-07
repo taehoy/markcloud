@@ -66,7 +66,6 @@ def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
     similar_list = []
     include_list = []
     sub_include_list = []
-    include_ids = set()
     score = 0.0
     keyword = keyword.rstrip()
     
@@ -79,7 +78,6 @@ def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
             # 모든 단어가 일치하는 경우
             if keyword in item["productName"]:
                 include_list.append(item)
-                include_ids.add(id(item))
                 continue
 
             # 유사한 경우
@@ -95,7 +93,6 @@ def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
             if contains_kyword(keyword_parts, item["productName"]):
                 print("포함된 상품명 : ", item["productName"])
                 sub_include_list.append(item)
-                include_ids.add(id(item))
                 continue
             # for keyword in keyword_parts:
             #     if keyword in item["productName"]:
@@ -112,7 +109,6 @@ def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
 
             if keyword in item["productNameEng"]:
                 include_list.append(item)
-                include_ids.add(id(item))
                 continue
 
             score = levenstein_distance(keyword, item["productNameEng"])
@@ -134,8 +130,6 @@ class ProductService:
 
         data = product_repository.load_data()
         
-        # result = data[start: end]
-
         if order == "asc":
             data = sorted(data, key=lambda x: (x.get("productName") is None, x.get("productName", "")))
         elif order == "desc":
