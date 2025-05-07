@@ -84,9 +84,10 @@ def find_similar_keywords(keyword: str, data: list, lang: str, threshold: float 
                 include_ids.add(id(item))
                 continue
 
-            score = jarowinkler_similarity(h2j(keyword), h2j(item["productNameEng"]))
+            score = levenstein_distance(keyword, item["productNameEng"])
             if score <= threshold and id(item) not in include_ids:
                 print("점수 : ", score, "상품명 : ", item["productNameEng"])
+                item["_score"]= score
                 similar_list.append(item)
     
     similar_list.sort(key=lambda x: x["_score"], reverse=False)
