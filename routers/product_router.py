@@ -34,6 +34,7 @@ async def search(
     status: Optional[str] = Query(None),
     order: Optional[str] = Query("desc"),
     mainCode: Optional[str] = Query(None),
+    lang: Optional[str] = Query("ko"),
     page: int = 1,
     limit: int = 10
     ):
@@ -43,10 +44,11 @@ async def search(
         status=status,
         order=order,
         mainCode=mainCode,
+        lang=lang,
         page=page,
         limit=limit
     )
-    
+
     result = [clean_nulls(item) for item in data]
 
     return result
