@@ -22,8 +22,8 @@ def clean_nulls(record: dict) -> dict:
     }
 
 @ProductRouter.get("/")
-async def root(page: int = 1, limit: int = 10):
-    data = product_service.get_all_trademark_data(page, limit)
+async def root(order: str = "asc", page: int = 1, limit: int = 10):
+    data = product_service.get_all_trademark_data(order, page, limit)
     result = [clean_nulls(item) for item in data]
 
     return result

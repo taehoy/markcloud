@@ -128,20 +128,19 @@ def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
     return include_list + sub_include_list+ similar_list
 
 class ProductService:
-    def get_all_trademark_data(self, page: int = 1, limit: int = 10):
+    def get_all_trademark_data(self, order: str, page: int = 1, limit: int = 10):
         start = (page - 1) * limit
         end = start + limit
 
         data = product_repository.load_data()
+        
+        # result = data[start: end]
 
-        # # # 출원일 정렬 필터링 - 기본값 desc(내림차순)
-        # if order:
-        #     if order == "asc":
-        #         data = sorted(data, key=lambda x: x["applicationDate"])
-        #     elif order == "desc":
-        #         data = sorted(data, key=lambda x: x["applicationDate"], reverse=True)
-        
-        
+        if order == "asc":
+            data = sorted(data, key=lambda x: (x.get("productName") is None, x.get("productName", "")))
+        elif order == "desc":
+            data = sorted(data, key=lambda x: (x.get("productName") is None, x.get("producName", "")), reverse=True)
+            
         return data[start: end]
     
     def get_similar_trademark_data(self, q: Optional[str] = None, page: int = 1, limit: int = 10):
