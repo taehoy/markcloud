@@ -59,6 +59,7 @@ def find_similar_keywords(keyword: str, data: list, threshold: float = 1):
 
 def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
     print("검색어 : ", keyword)
+    keyword = keyword.rstrip()
     keyword_parts = okt.nouns(keyword)
     # keyword_parts = split_korean_compound(keyword)
     print("검색어 분리 후  : ", keyword_parts)
@@ -66,56 +67,89 @@ def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
     similar_list = []
     include_list = []
     sub_include_list = []
-    score = 0.0
-    keyword = keyword.rstrip()
-    
-    if lang == "ko":
-        for item in data:
+    include_ids = set()
 
-            if not item["productName"] :
-                continue
+    for item in data:
+        name = item.get("productName" if lang == "ko" else "productNameEng", "")
+        
+        if not name:
+            continue
+
+        item_id = id(item)
+        name_lower = name.lower()
+        keyword_lower = keyword.lower()
+        
+        # 완전포함
+        if keyword_lower in name_lower:
+            include_list.append(item)
+            include_ids.add(item_id)
+            continue
+
+        # 부분 포함
+        if lang == "ko" and any(part in name_lower for part in keyword_parts):
+            sub_include_list.append(item)
+            include_ids.add(item_id)
+            continue
+        
+        # 유사비교
+        if item_id not in include_ids:
+            if lang == "ko":
+                score = levenstein_distance(h2j(keyword), h2j(name))
+            else:
+                score = levenstein_distance(keyword_lower, name_lower)
             
-            # 모든 단어가 일치하는 경우
-            if keyword in item["productName"]:
-                include_list.append(item)
-                continue
-
-            # 유사한 경우
-            score = levenstein_distance(h2j(keyword), h2j(item["productName"]))
-            if score <= threshold :
-                item["_score"]= score
-                print("점수 : ", score, "상품명 : ", item["productName"])
+            if score <= threshold:
+                item["_score"] = score
+                print("점수 : ", score, "상품명 : ", name)
                 similar_list.append(item)
-                continue
+    # if lang == "ko":
+    #     for item in data:
 
-
-            # 부분 단어가 포함하는 경우
-            if contains_kyword(keyword_parts, item["productName"]):
-                print("포함된 상품명 : ", item["productName"])
-                sub_include_list.append(item)
-                continue
-            # for keyword in keyword_parts:
-            #     if keyword in item["productName"]:
-            #         include_list.append(item)
-            #         include_ids.add(id(item))
-
-            # score = jellyfish.jaro_winkler_similarity(h2j(keyword), h2j(item["productName"]))
-            # score = jarowinkler_similarity(keyword, item["productName"])
+    #         if not item["productName"] :
+    #             continue
             
-    if lang == "en":
-        for item in data:
-            if not item["productNameEng"]:
-                continue
+    #         # 모든 단어가 일치하는 경우
+    #         if keyword in item["productName"]:
+    #             include_list.append(item)
+    #             continue
 
-            if keyword in item["productNameEng"]:
-                include_list.append(item)
-                continue
+    #         # 부분 단어가 포함하는 경우
+    #         if contains_kyword(keyword_parts, item["productName"]):
+    #             print("포함된 상품명 : ", item["productName"])
+    #             sub_include_list.append(item)
+    #             continue
+        
+                
+    #         # 유사한 경우
+    #         score = levenstein_distance(h2j(keyword), h2j(item["productName"]))
+    #         if score <= threshold :
+    #             item["_score"]= score
+    #             print("점수 : ", score, "상품명 : ", item["productName"])
+    #             similar_list.append(item)
+    #             continue
 
-            score = levenstein_distance(keyword, item["productNameEng"])
-            if score <= threshold and id(item) not in include_ids:
-                print("점수 : ", score, "상품명 : ", item["productNameEng"])
-                item["_score"]= score
-                similar_list.append(item)
+    #         # for keyword in keyword_parts:
+    #         #     if keyword in item["productName"]:
+    #         #         include_list.append(item)
+    #         #         include_ids.add(id(item))
+
+    #         # score = jellyfish.jaro_winkler_similarity(h2j(keyword), h2j(item["productName"]))
+    #         # score = jarowinkler_similarity(keyword, item["productName"])
+            
+    # if lang == "en":
+    #     for item in data:
+    #         if not item["productNameEng"]:
+    #             continue
+
+    #         if keyword in item["productNameEng"]:
+    #             include_list.append(item)
+    #             continue
+
+    #         score = levenstein_distance(keyword, item["productNameEng"])
+    #         if score <= threshold and id(item) not in include_ids:
+    #             print("점수 : ", score, "상품명 : ", item["productNameEng"])
+    #             item["_score"]= score
+    #             similar_list.append(item)
     
     similar_list.sort(key=lambda x: x["_score"], reverse=False)
     # for item in similar_list:
