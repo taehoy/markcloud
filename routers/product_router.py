@@ -28,11 +28,23 @@ async def root(page: int = 1, limit: int = 10):
 
     return result
 
+@ProductRouter.get("/similar")
+async def similar_search(
+    q: Optional[str] = Query(None),
+    page: int = 1,
+    limit: int = 10
+):
+    data = product_service.get_similar_trademark_data(q=q, page=page, limit=limit)
+    
+    result = [clean_nulls(item) for item in data]
+
+    return result
+
+
 @ProductRouter.get("/search")
 async def search(
     q: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
-    order: Optional[str] = Query("desc"),
     mainCode: Optional[str] = Query(None),
     lang: Optional[str] = Query("ko"),
     page: int = 1,
@@ -42,7 +54,6 @@ async def search(
     data = product_service.get_search_trademark_data(
         q=q,
         status=status,
-        order=order,
         mainCode=mainCode,
         lang=lang,
         page=page,

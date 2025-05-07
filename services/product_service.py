@@ -40,13 +40,32 @@ def levenstein_distance(s1: str, s2: str) -> int:
     
     return dp[m][n]
 
-def find_similar_keywords(keyword: str, data: list, lang: str, threshold: float = 2):
+def find_similar_keywords(keyword: str, data: list, threshold: float = 1):
+    keyword = keyword.rstrip()
+    similar_list = []
+    for item in data:
+        if not item["productName"] :
+            continue
+
+        score = levenstein_distance(h2j(keyword), h2j(item["productName"]))
+        if score <= threshold :
+            item["_score"]= score
+            print("점수 : ", score, "상품명 : ", item["productName"])
+            similar_list.append(item)
+            continue
+
+    similar_list.sort(key=lambda x: x["_score"], reverse=False)
+    return similar_list
+
+def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
     print("검색어 : ", keyword)
     keyword_parts = okt.nouns(keyword)
+    # keyword_parts = split_korean_compound(keyword)
     print("검색어 분리 후  : ", keyword_parts)
 
     similar_list = []
     include_list = []
+    sub_include_list = []
     include_ids = set()
     score = 0.0
     keyword = keyword.rstrip()
@@ -56,9 +75,26 @@ def find_similar_keywords(keyword: str, data: list, lang: str, threshold: float 
 
             if not item["productName"] :
                 continue
-
-            if contains_kyword(keyword_parts, item["productName"]):
+            
+            # 모든 단어가 일치하는 경우
+            if keyword in item["productName"]:
                 include_list.append(item)
+                include_ids.add(id(item))
+                continue
+
+            # 유사한 경우
+            score = levenstein_distance(h2j(keyword), h2j(item["productName"]))
+            if score <= threshold :
+                item["_score"]= score
+                print("점수 : ", score, "상품명 : ", item["productName"])
+                similar_list.append(item)
+                continue
+
+
+            # 부분 단어가 포함하는 경우
+            if contains_kyword(keyword_parts, item["productName"]):
+                print("포함된 상품명 : ", item["productName"])
+                sub_include_list.append(item)
                 include_ids.add(id(item))
                 continue
             # for keyword in keyword_parts:
@@ -68,12 +104,7 @@ def find_similar_keywords(keyword: str, data: list, lang: str, threshold: float 
 
             # score = jellyfish.jaro_winkler_similarity(h2j(keyword), h2j(item["productName"]))
             # score = jarowinkler_similarity(keyword, item["productName"])
-            score = levenstein_distance(h2j(keyword), h2j(item["productName"]))
-            if score <= threshold and id(item) not in include_ids:
-                item["_score"]= score
-                print("점수 : ", score, "상품명 : ", item["productName"])
-                similar_list.append(item)
-
+            
     if lang == "en":
         for item in data:
             if not item["productNameEng"]:
@@ -94,7 +125,7 @@ def find_similar_keywords(keyword: str, data: list, lang: str, threshold: float 
     # for item in similar_list:
     #     item.pop("_score", None)
         
-    return include_list + similar_list
+    return include_list + sub_include_list+ similar_list
 
 class ProductService:
     def get_all_trademark_data(self, page: int = 1, limit: int = 10):
@@ -102,14 +133,31 @@ class ProductService:
         end = start + limit
 
         data = product_repository.load_data()
+
+        # # # 출원일 정렬 필터링 - 기본값 desc(내림차순)
+        # if order:
+        #     if order == "asc":
+        #         data = sorted(data, key=lambda x: x["applicationDate"])
+        #     elif order == "desc":
+        #         data = sorted(data, key=lambda x: x["applicationDate"], reverse=True)
+        
         
         return data[start: end]
     
+    def get_similar_trademark_data(self, q: Optional[str] = None, page: int = 1, limit: int = 10):
+        start = (page - 1) * limit
+        end = start + limit
+        data = product_repository.load_data()
+
+        if q and q.rstrip():
+            data = find_similar_keywords(q, data)
+        
+        return data[start: end]
+
     def get_search_trademark_data(
         self,
         q: Optional[str] = None,
         status: Optional[str] = None,
-        order: Optional[str] = "desc",
         mainCode: Optional[str] = None,
         lang: Optional[str] = "ko",
         page: int = 1,
@@ -119,14 +167,6 @@ class ProductService:
         end = start + limit
         data = product_repository.load_data()
 
-
-        # # 출원일 정렬 필터링 - 기본값 desc(내림차순)
-        if order:
-            if order == "asc":
-                data = sorted(data, key=lambda x: x["applicationDate"])
-            elif order == "desc":
-                data = sorted(data, key=lambda x: x["applicationDate"], reverse=True)
-        
         # 상품 주 분류 코드 필터링
         if mainCode:
             data = [
@@ -140,7 +180,7 @@ class ProductService:
 
         # 상표명 검색 필터링 - 한글, 영어 혼합 검색
         if q and q.rstrip():
-            data = find_similar_keywords(q, data, lang)
+            data = find_keywords(q, data, lang)
         
         
         return data[start: end]
