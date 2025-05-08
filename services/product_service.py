@@ -1,14 +1,11 @@
 from repositories.product_repository import ProductRepository
-from enum import Enum
 from typing import Optional
 from jamo import h2j
-import json
 from konlpy.tag import Okt
 
 okt = Okt()
 
 def levenstein_distance(s1: str, s2: str) -> int:
-
     m, n = len(s1), len(s2)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
     
@@ -82,8 +79,6 @@ class ProductService:
         self.product_repository = repository
 
     def get_all_trademark_data(self, order: str, page: int = 1, limit: int = 10):
-        
-
         start = (page - 1) * limit
         end = start + limit
 
@@ -105,10 +100,9 @@ class ProductService:
         page: int = 1,
         limit: int = 10
     ):
-        
-        
         start = (page - 1) * limit
         end = start + limit
+
         data = self.product_repository.load_data()
 
         # 상품 주 분류 코드 필터링
@@ -125,6 +119,5 @@ class ProductService:
         # 상표명 검색 필터링 - 한글, 영어 혼합 검색
         if q and q.rstrip():
             data = find_keywords(q, data, lang)
-        
         
         return data[start: end]

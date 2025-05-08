@@ -14,7 +14,6 @@ def get_product_service():
     repository = ProductRepository()
     return ProductService(repository)
 
-
 class RegisterStatus(str, Enum):
     APPLICATION = "출원",
     REGISTRATION = "등록",
@@ -27,7 +26,6 @@ async def root(order: str = "asc",
             limit: int = 10,
             service: ProductService = Depends(get_product_service)
             ):
-    
     if order not in ["asc", "desc"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -49,7 +47,6 @@ async def search(
     limit: int = 10,
     service: ProductService = Depends(get_product_service)
     ):
-
     validate_query(q)
     
     if lang not in ["ko", "en"]:
