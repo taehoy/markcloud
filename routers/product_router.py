@@ -1,9 +1,9 @@
 from fastapi import APIRouter,Query
 from enum import Enum
 from typing import Optional
-from services.product_service import ProductService
 
-import json
+from services.product_service import ProductService
+from utils.utils import clean_nulls
 
 ProductRouter = APIRouter()
 product_service = ProductService()
@@ -13,13 +13,6 @@ class RegisterStatus(str, Enum):
     REGISTRATION = "등록",
     INVALIDATION = "실효",
     REJECTION = "거절"
-
-# null 값 -> ""로 변환
-def clean_nulls(record: dict) -> dict:
-    return {
-        k: ("" if v is None else v)
-        for k, v in record.items()
-    }
 
 @ProductRouter.get("/")
 async def root(order: str = "asc", page: int = 1, limit: int = 10):
