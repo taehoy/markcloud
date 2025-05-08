@@ -29,11 +29,11 @@ async def root(order: str = "asc",
             ):
     
     if order not in ["asc", "desc"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"유효하지 않은 'order' 파라미터 값입니다. 'asc' 또는 'desc'로 입력하시길 바랍니다. 입력한 order 값 : {order}."
-            )
-    
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"유효하지 않은 'order' 파라미터 값입니다. 'asc' 또는 'desc'로 입력하시길 바랍니다. 입력한 order 값 : {order}."
+        )
+
     data = service.get_all_trademark_data(order, page, limit)
     result = [clean_nulls(item) for item in data]
 
@@ -42,7 +42,7 @@ async def root(order: str = "asc",
 @ProductRouter.get("/search")
 async def search(
     q: Optional[str] = Query(None),
-    status: Optional[str] = Query(None),
+    status: Optional[RegisterStatus] = Query(None),
     mainCode: Optional[str] = Query(None),
     lang: Optional[str] = Query("ko"),
     page: int = 1,
