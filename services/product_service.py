@@ -3,16 +3,10 @@ from enum import Enum
 from typing import Optional
 from jamo import h2j
 import json
-import jellyfish
-from jarowinkler import jarowinkler_similarity
 from konlpy.tag import Okt
-import re
 
 product_repository = ProductRepository()
 okt = Okt()
-
-def split_korean_compound(keyword: str) -> list:
-    return re.findall(r'..|.', keyword)
 
 def contains_kyword(keyword_parts: list, product_name: str) -> bool:
     for keyword in keyword_parts:
@@ -39,23 +33,6 @@ def levenstein_distance(s1: str, s2: str) -> int:
                 dp[i][j] = 1 + min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1])
     
     return dp[m][n]
-
-def find_similar_keywords(keyword: str, data: list, threshold: float = 1):
-    keyword = keyword.rstrip()
-    similar_list = []
-    for item in data:
-        if not item["productName"] :
-            continue
-
-        score = levenstein_distance(h2j(keyword), h2j(item["productName"]))
-        if score <= threshold :
-            item["_score"]= score
-            print("점수 : ", score, "상품명 : ", item["productName"])
-            similar_list.append(item)
-            continue
-
-    similar_list.sort(key=lambda x: x["_score"], reverse=False)
-    return similar_list
 
 def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
     print("검색어 : ", keyword)
