@@ -1,4 +1,3 @@
-from fastapi import HTTPException, status
 from repositories.product_repository import ProductRepository
 from enum import Enum
 from typing import Optional
@@ -83,11 +82,7 @@ class ProductService:
         self.product_repository = repository
 
     def get_all_trademark_data(self, order: str, page: int = 1, limit: int = 10):
-        if order not in ["asc", "desc"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"유효하지 않은 'order' 파라미터 값입니다. 'asc' 또는 'desc'로 입력하시길 바랍니다. 입력한 order 값 : {order}."
-            )
+        
 
         start = (page - 1) * limit
         end = start + limit
@@ -111,11 +106,6 @@ class ProductService:
         limit: int = 10
     ):
         
-        if lang not in ["ko", "en"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"언어 설정(lang)은 'ko'(한글) 또는 'en'(영어)만 지원합니다. 현재 입력한 lang : {lang}. "
-            )
         
         start = (page - 1) * limit
         end = start + limit
