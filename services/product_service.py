@@ -5,7 +5,6 @@ from jamo import h2j
 import json
 from konlpy.tag import Okt
 
-product_repository = ProductRepository()
 okt = Okt()
 
 def levenstein_distance(s1: str, s2: str) -> int:
@@ -80,11 +79,14 @@ def find_keywords(keyword: str, data: list, lang: str, threshold: float = 1):
     return include_list + sub_include_list+ similar_list
 
 class ProductService:
+    def __init__(self, repository: ProductRepository):
+        self.product_repository = repository
+
     def get_all_trademark_data(self, order: str, page: int = 1, limit: int = 10):
         start = (page - 1) * limit
         end = start + limit
 
-        data = product_repository.load_data()
+        data = self.product_repository.load_data()
         
         if order == "asc":
             data = sorted(data, key=lambda x: (x.get("productName") is None, x.get("productName", "")))
@@ -104,7 +106,7 @@ class ProductService:
     ):
         start = (page - 1) * limit
         end = start + limit
-        data = product_repository.load_data()
+        data = self.product_repository.load_data()
 
         # 상품 주 분류 코드 필터링
         if mainCode:
