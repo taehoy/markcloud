@@ -8,12 +8,6 @@ from konlpy.tag import Okt
 product_repository = ProductRepository()
 okt = Okt()
 
-def contains_kyword(keyword_parts: list, product_name: str) -> bool:
-    for keyword in keyword_parts:
-        if keyword in product_name:
-            return True
-    return False
-
 def levenstein_distance(s1: str, s2: str) -> int:
 
     m, n = len(s1), len(s2)
@@ -97,16 +91,6 @@ class ProductService:
         elif order == "desc":
             data = sorted(data, key=lambda x: (x.get("productName") is None, x.get("producName", "")), reverse=True)
             
-        return data[start: end]
-    
-    def get_similar_trademark_data(self, q: Optional[str] = None, page: int = 1, limit: int = 10):
-        start = (page - 1) * limit
-        end = start + limit
-        data = product_repository.load_data()
-
-        if q and q.rstrip():
-            data = find_similar_keywords(q, data)
-        
         return data[start: end]
 
     def get_search_trademark_data(
